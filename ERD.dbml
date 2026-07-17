@@ -1,0 +1,125 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table users {
+  id integer [primary key]
+  username varchar [unique, not null]
+  email varchar [unique, not null]
+  role varchar [not null, default: 'user']
+  password_hash varchar [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Merged profile and personal_info tables to reduce redundant 1-to-1 relations
+Table profiles {
+  id integer [primary key]
+  user_id integer [not null, unique]
+  full_name varchar
+  dp_url varchar
+  title varchar
+  public_email varchar
+  public_phone varchar
+  bio_text text
+  professional_summary text
+  location varchar
+  status varchar
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Flexible social links: dynamic platform configuration
+Table social_links {
+  id integer [primary key]
+  user_id integer [not null]
+  platform_name varchar [not null] // e.g., 'GitHub', 'LinkedIn', 'X'
+  url varchar [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table resumes {
+  id integer [primary key]
+  user_id integer [not null]
+  url varchar [not null]
+  is_active boolean [default: true] // Helps if users want to keep drafts or historical resumes
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table experiences {
+  id integer [primary key]
+  user_id integer [not null]
+  company_name varchar [not null] // Fixed typo
+  start_date date [not null]
+  end_date date [note: 'null if currently working']
+  position varchar [not null]
+  assigned_tasks text[] // PostgreSQL text array, or you can use a text field
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table projects {
+  id integer [primary key]
+  user_id integer [not null]
+  project_name varchar [not null]
+  short_description varchar
+  description text
+  project_image_urls varchar[] // Array of image URLs
+  project_links jsonb // Store links like {"github": "...", "live": "..."}
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Centralized Skills table for better relationships and filtering
+Table skills {
+  id integer [primary key]
+  user_id integer [not null]
+  name varchar [not null] // e.g., 'React', 'Python'
+  category varchar // e.g., 'Frontend', 'Backend', 'Database'
+  proficiency varchar // e.g., 'Intermediate', 'Expert'
+}
+
+// Junction table to map skills directly to projects (Many-to-Many)
+Table project_skills {
+  project_id integer [ref: > projects.id, not null]
+  skill_id integer [ref: > skills.id, not null]
+  
+  indexes {
+    (project_id, skill_id) [pk]
+  }
+}
+
+// New recommendation: Structured Education Table (Common for portfolios)
+Table education {
+  id integer [primary key]
+  user_id integer [not null]
+  institution varchar [not null]
+  degree varchar [not null]
+  field_of_study varchar
+  start_date date [not null]
+  end_date date
+  grade varchar
+  description text
+}
+
+Table additional_info {
+  id integer [primary key]
+  user_id integer [not null]
+  title varchar [not null]
+  sub_title varchar
+  options varchar[]
+  info_body text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Relationships with Cascade Delete behavior configured
+Ref: profiles.user_id > users.id [delete: cascade] // Adjusted to > with unique constraint for 1-to-1 behavior in DBML
+Ref: social_links.user_id > users.id [delete: cascade]
+Ref: resumes.user_id > users.id [delete: cascade]
+Ref: experiences.user_id > users.id [delete: cascade]
+Ref: projects.user_id > users.id [delete: cascade]
+Ref: skills.user_id > users.id [delete: cascade]
+Ref: education.user_id > users.id [delete: cascade]
+Ref: additional_info.user_id > users.id [delete: cascade]
