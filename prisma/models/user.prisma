@@ -1,0 +1,15 @@
+enum Role {
+  MEMBER
+  ADMIN
+  GUEST
+}
+
+model User {
+    id       String   @id @default(uuid())
+    username String   @unique
+    email    String   @unique
+    role     Role     @default(MEMBER) 
+    password_hash String
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt 
+}

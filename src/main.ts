@@ -2,7 +2,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
+import { ZodValidationPipe } from 'nestjs-zod';
 import compression from 'compression';
 import helmet from 'helmet';
 
@@ -14,6 +14,8 @@ async function bootstrap() {
   const frontendUrl = configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
 
   // middleware
+  app.useGlobalPipes(new ZodValidationPipe());
+
   app.use(helmet());
   app.use(compression());
 
@@ -21,17 +23,6 @@ async function bootstrap() {
     origin: [frontendUrl],
     credentials: true,
   });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // strip unknown fields
-      forbidNonWhitelisted: true, // reject unknown fields
-      transform: true, // auto-transform DTO types
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
 
   app.setGlobalPrefix('api/v1');
   app.enableShutdownHooks();
