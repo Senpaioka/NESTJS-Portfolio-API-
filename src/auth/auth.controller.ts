@@ -1,8 +1,18 @@
-import { Body, Controller, Post, Res, UseGuards, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  UseGuards,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forget-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Public } from './decorators/public.decorator';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -10,7 +20,7 @@ import type { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   // register
   @Public()
@@ -42,7 +52,13 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken = request.cookies?.refreshToken;
+    const refreshToken = request.cookies?.refreshToken as string | undefined;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token missing from cookies');
+    }
+
+    // TypeScript now guarantees that 'refreshToken' is strictly a string here!
     const tokens = await this.authService.refreshTokens(user.sub, refreshToken);
 
     // Set HTTP-Only cookie for refresh token
@@ -87,7 +103,18 @@ export class AuthController {
     response.clearCookie('refreshToken');
     return { message: 'Logged out successfully' };
   }
+
+  // forget password
+  @Public()
+  @Post('forget-password')
+  async forgetPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  // reset password
+  @Public()
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
+  }
 }
-
-
-
