@@ -20,16 +20,19 @@ export class RefreshTokenGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    const token = this.extractTokenFromHeader(request);
+    const refreshToken = this.extractRefreshToken(request);
 
-    if (!token) {
+    if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is missing.');
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-      });
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        {
+          secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+        },
+      );
 
       request.user = payload;
 
@@ -39,19 +42,10 @@ export class RefreshTokenGuard implements CanActivate {
     }
   }
 
-  private extractTokenFromHeader(request: AuthenticatedRequest): string | null {
-    const authHeader = request.headers.authorization;
+  private extractRefreshToken(request: AuthenticatedRequest): string | null {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const refreshToken = request.cookies?.refreshToken;
 
-    if (!authHeader) {
-      return null;
-    }
-
-    const [scheme, token] = authHeader.split(' ');
-
-    if (scheme !== 'Bearer' || !token) {
-      return null;
-    }
-
-    return token;
+    return typeof refreshToken === 'string' ? refreshToken : null;
   }
 }

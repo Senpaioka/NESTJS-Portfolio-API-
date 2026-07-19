@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ZodValidationPipe } from 'nestjs-zod';
+import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
 
@@ -16,6 +17,7 @@ async function bootstrap() {
   // middleware
   app.useGlobalPipes(new ZodValidationPipe());
 
+  app.use(cookieParser());
   app.use(helmet());
   app.use(compression());
 
