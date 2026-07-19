@@ -124,4 +124,10 @@ export class AuthController {
   }
 
   // resend verification OTP
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 requests / 10 minutes
+  @Post('resend-verification-otp')
+  async resendVerificationOtp(@Body() dto: ResendVerificationOtpDto) {
+    return this.authService.resendVerificationOtp(dto);
+  }
 }

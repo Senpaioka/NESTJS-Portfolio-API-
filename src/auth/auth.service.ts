@@ -16,6 +16,7 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forget-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendVerificationOtpDto } from './dto/resend-verification-otp.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Role } from '../common/enums/role.enum';
 import { AuthResponse } from './interfaces/auth-response.interface';
@@ -301,6 +302,73 @@ export class AuthService {
 
     return {
       message: 'Email verified successfully.',
+    };
+  }
+
+  // resend verified otp
+  async resendVerificationOtp(
+    dto: ResendVerificationOtpDto,
+  ): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    // Never reveal whether an email exists.
+    if (!user) {
+      return {
+        message: 'If the email exists, a verification code has been sent.',
+      };
+    }
+
+    if (user.is_verified) {
+      throw new BadRequestException('Email is already verified.');
+    }
+
+    // --- cool-down check ---
+    // If a token exists and expires in 10 mins, more than 5 mins left means they requested it less than 5 mins ago.
+    if (user.email_verification_expires_at) {
+      // Explicitly wrap or cast the Date to ensure TypeScript resolves the call
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, prettier/prettier
+      const remainingTimeMs = new Date(user.email_verification_expires_at).getTime() - Date.now();
+      const fiveMinutesInMs = 5 * 60 * 1000;
+      const tenMinutesInMs = 10 * 60 * 1000;
+
+      // remainingTimeMs > 5 minutes means less than 5 minutes have passed since creation
+      if (
+        remainingTimeMs > fiveMinutesInMs &&
+        remainingTimeMs <= tenMinutesInMs
+      ) {
+        throw new BadRequestException(
+          'Please wait at least 5 minutes before requesting another verification code.',
+        );
+      }
+    }
+    // ----------------------
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await argon2.hash(otp);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        email_verification_hash: otpHash,
+        email_verification_expires_at: expiresAt,
+      },
+    });
+
+    await this.mailService.sendVerificationEmail(
+      user.email,
+      user.username,
+      otp,
+    );
+
+    return {
+      message: 'If the email exists, a verification code has been sent.',
     };
   }
 }
