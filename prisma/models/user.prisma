@@ -10,10 +10,15 @@ model User {
     email               String   @unique
     role                Role     @default(MEMBER) 
     password_hash       String
-    refresh_token_hash  String?
-    password_reset_token   String?   @unique
-    password_reset_expires DateTime?
+    refresh_token_hash      String?
+    
+    password_reset_token    String?   @unique
+    password_reset_expires  DateTime?
+    
+    email_verification_hash String?
+    email_verification_expires_at DateTime?
     is_verified         Boolean  @default(false)
+    
     created_at          DateTime @default(now())
     updated_at          DateTime @updatedAt 
 }

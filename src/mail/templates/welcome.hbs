@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to YourApp!</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100% !important;
+      background-color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    .wrapper {
+      width: 100%;
+      table-layout: fixed;
+      background-color: #f8fafc;
+      padding: 40px 0;
+    }
+    .container {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    .content {
+      padding: 40px 40px;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2563eb; /* Vibrant brand blue for the welcome message */
+      letter-spacing: -0.5px;
+      margin-bottom: 32px;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 0;
+      margin-bottom: 16px;
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+    }
+    .text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #475569;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+    /* Quick Steps styling */
+    .steps-container {
+      margin: 32px 0;
+      padding: 0;
+      list-style: none;
+    }
+    .step-item {
+      margin-bottom: 20px;
+      display: flex;
+    }
+    .step-number {
+      background-color: #eff6ff;
+      color: #2563eb;
+      font-weight: 700;
+      font-size: 14px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .step-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .btn-container {
+      margin: 32px 0 16px 0;
+    }
+    .btn {
+      display: inline-block;
+      background-color: #2563eb;
+      color: #ffffff !important;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 14px 36px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+    .divider {
+      border: 0;
+      border-top: 1px solid #e2e8f0;
+      margin: 32px 0 24px 0;
+    }
+    .footer-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #94a3b8;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <table class="wrapper" width="100%" role="presentation">
+    <tr>
+      <td align="center">
+        <table class="container" role="presentation">
+          <tr>
+            <td class="content">
+              
+              <div class="logo">YourApp</div>
+
+              <h1 class="title">Welcome aboard, {{username}}! 👋</h1>
+              
+              <p class="text">
+                We're absolutely thrilled to have you here. Your account is fully set up and ready to rock. Here are a few quick tips to help you get the absolute most out of your dashboard right out of the gate:
+              </p>
+
+              <!-- Guided Next Steps -->
+              <ul class="steps-container">
+                <li class="step-item">
+                  <div class="step-number">1</div>
+                  <div class="step-text"><strong>Complete your profile:</strong> Upload an avatar and add your details to customize your workspace.</div>
+                </li>
+                <li class="step-item">
+                  <div class="step-number">2</div>
+                  <div class="step-text"><strong>Explore the dashboard:</strong> Check out your main feed to see real-time updates and analytics.</div>
+                </li>
+                <li class="step-item">
+                  <div class="step-number">3</div>
+                  <div class="step-text"><strong>Invite team members:</strong> Collaboration is seamless—bring in your peers directly from the settings panel.</div>
+                </li>
+              </ul>
+
+              <!-- Big Call to Action -->
+              <table class="btn-container" role="presentation">
+                <tr>
+                  <td>
+                    <a href="{{loginUrl}}" class="btn" target="_blank">Go to Dashboard</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p class="text" style="margin-top: 24px;">
+                Have questions or hit a roadblock? Just hit reply to this email—our customer support team is always hanging out here to help you get sorted.
+              </p>
+
+              <p class="text" style="margin-bottom: 0;">
+                Cheers,<br>
+                <strong>The YourApp Team</strong>
+              </p>
+
+              <hr class="divider">
+
+              <p class="footer-text">
+                You are receiving this email because you created an account on YourApp.<br>
+                &copy; {{year}} YourApp. All rights reserved.
+              </p>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

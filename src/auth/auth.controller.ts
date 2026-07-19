@@ -17,13 +17,28 @@ import { Public } from './decorators/public.decorator';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import type { JwtPayload } from './interfaces/jwt-payload.interface';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // refresh-token handler
+  private setRefreshTokenCookie(
+    response: Response,
+    refreshToken: string,
+  ): void {
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+  }
+
   // register
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 600000 } }) // 5 requests / 10 minutes
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -33,18 +48,14 @@ export class AuthController {
       await this.authService.register(dto);
 
     // Set HTTP-Only cookie for refresh token
-    response.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-    });
+    this.setRefreshTokenCookie(response, refreshToken);
 
     return { accessToken, user };
   }
 
   // refresh token
   @Public()
+  @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 requests / minute
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-token')
   async refreshToken(
@@ -62,18 +73,14 @@ export class AuthController {
     const tokens = await this.authService.refreshTokens(user.sub, refreshToken);
 
     // Set HTTP-Only cookie for refresh token
-    response.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-    });
+    this.setRefreshTokenCookie(response, refreshToken);
 
     return { accessToken: tokens.accessToken, user: tokens.user };
   }
 
   // login
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests / 1 minute
   @Post('login')
   async login(
     @Body() dto: LoginDto,
@@ -83,12 +90,7 @@ export class AuthController {
       await this.authService.login(dto);
 
     // Set HTTP-Only cookie for refresh token
-    response.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-    });
+    this.setRefreshTokenCookie(response, refreshToken);
 
     return { accessToken, user };
   }
@@ -106,6 +108,7 @@ export class AuthController {
 
   // forget password
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 requests / 10 minutes
   @Post('forget-password')
   async forgetPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
@@ -113,6 +116,7 @@ export class AuthController {
 
   // reset password
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 600000 } }) // 10 requests / 10 minutes
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
