@@ -215,8 +215,6 @@ export class AuthService {
       },
     });
 
-    console.log(`🔑 PASSWORD RESET TOKEN FOR ${user.email}: ${resetToken}`);
-
     return {
       message: 'Password reset token generated.',
       resetToken,
