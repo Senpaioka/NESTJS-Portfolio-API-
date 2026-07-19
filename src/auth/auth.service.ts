@@ -1,10 +1,11 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Role } from '../common/enums/role.enum';
 import { AuthResponse } from './interfaces/auth-response.interface';
@@ -16,7 +17,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   // 1. Set the return type to Promise<AuthResponseDto>
   async register(dto: RegisterDto): Promise<AuthResponse> {
@@ -90,4 +91,62 @@ export class AuthService {
       },
     };
   }
+
+  // refresh-token
+  async refreshTokens(userId: string, refreshToken: string): Promise<AuthResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.refresh_token_hash) {
+      throw new UnauthorizedException('Access Denied');
+    }
+
+    const refreshTokenMatches = await argon2.verify(
+      user.refresh_token_hash,
+      refreshToken,
+    );
+
+    if (!refreshTokenMatches) {
+      throw new UnauthorizedException('Access Denied');
+    }
+
+    return this.generateTokens(user);
+  }
+
+  // login
+  async login(dto: LoginDto): Promise<AuthResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const passwordMatches = await argon2.verify(user.password_hash, dto.password);
+
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return this.generateTokens(user);
+  }
+
+  // logout
+  async logout(userId: string): Promise<void> {
+    await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        refresh_token_hash: { not: null },
+      },
+      data: {
+        refresh_token_hash: null,
+      },
+    });
+  }
+
 }
+
+
+
