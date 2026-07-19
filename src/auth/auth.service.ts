@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +15,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forget-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Role } from '../common/enums/role.enum';
 import { AuthResponse } from './interfaces/auth-response.interface';
@@ -55,7 +57,7 @@ export class AuthService {
 
     // Generate a 6-digit OTP and store its hash
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+    const hashedOtp = await argon2.hash(otp);
     const otpExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
     await this.prisma.user.update({
@@ -250,5 +252,55 @@ export class AuthService {
     });
 
     return { message: 'Password has been reset successfully.' };
+  }
+
+  // verify email
+  async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    if (user.is_verified) {
+      throw new BadRequestException('Email is already verified.');
+    }
+
+    if (!user.email_verification_hash || !user.email_verification_expires_at) {
+      throw new BadRequestException('Verification code is invalid.');
+    }
+
+    if (user.email_verification_expires_at < new Date()) {
+      throw new BadRequestException('Verification code has expired.');
+    }
+
+    // Explicitly narrow the types to pure strings so argon2 is completely satisfied
+    const storedHash: string = user.email_verification_hash as string;
+    const incomingOtp: string = String(dto.otp);
+
+    const isValidOtp = await argon2.verify(storedHash, incomingOtp);
+
+    if (!isValidOtp) {
+      throw new BadRequestException('Invalid verification code.');
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        is_verified: true,
+        email_verification_hash: null,
+        email_verification_expires_at: null,
+      },
+    });
+
+    return {
+      message: 'Email verified successfully.',
+    };
   }
 }
