@@ -24,15 +24,15 @@ export class MailService {
   async sendForgotPasswordEmail(
     email: string,
     username: string,
-    resetUrl: string,
+    otp: string,
   ): Promise<void> {
     await this.mailerService.sendMail({
       to: email,
-      subject: 'Reset Your Password',
-      template: 'forgot-password',
+      subject: 'Password Reset Code',
+      template: 'auth/forgot-password',
       context: {
         username,
-        resetUrl,
+        otp,
       },
     });
   }
