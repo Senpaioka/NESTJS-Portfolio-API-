@@ -26,7 +26,10 @@ import { join } from 'path';
         },
 
         template: {
-          dir: join(__dirname, 'templates'),
+          dir:
+            process.env.NODE_ENV === 'production'
+              ? join(process.cwd(), 'dist', 'mail', 'templates')
+              : join(process.cwd(), 'src', 'mail', 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

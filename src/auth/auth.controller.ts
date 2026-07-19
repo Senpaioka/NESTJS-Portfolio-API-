@@ -2,9 +2,9 @@ import {
   Body,
   Controller,
   Post,
-  Res,
   UseGuards,
   Req,
+  Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
@@ -40,17 +40,8 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 5, ttl: 600000 } }) // 5 requests / 10 minutes
   @Post('register')
-  async register(
-    @Body() dto: RegisterDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const { accessToken, refreshToken, user } =
-      await this.authService.register(dto);
-
-    // Set HTTP-Only cookie for refresh token
-    this.setRefreshTokenCookie(response, refreshToken);
-
-    return { accessToken, user };
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
   // refresh token

@@ -13,7 +13,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verify Your Email',
-      template: 'verify-email',
+      template: 'auth/verify-email',
       context: {
         username,
         otp,
@@ -29,7 +29,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Password Reset Code',
-      template: 'auth/forgot-password',
+      template: 'forgot-password',
       context: {
         username,
         otp,

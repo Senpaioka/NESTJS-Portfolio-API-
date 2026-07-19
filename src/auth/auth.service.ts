@@ -29,8 +29,7 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  // 1. Set the return type to Promise<AuthResponseDto>
-  async register(dto: RegisterDto): Promise<AuthResponse> {
+  async register(dto: RegisterDto): Promise<{ message: string }> {
     const existingUser = await this.prisma.user.findFirst({
       where: {
         OR: [{ email: dto.email }, { username: dto.username }],
@@ -54,7 +53,29 @@ export class AuthService {
       },
     });
 
-    return this.generateTokens(user);
+    // Generate a 6-digit OTP and store its hash
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+    const otpExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        email_verification_hash: hashedOtp,
+        email_verification_expires_at: otpExpires,
+      },
+    });
+
+    await this.mailService.sendVerificationEmail(
+      user.email,
+      user.username,
+      otp,
+    );
+
+    return {
+      message:
+        'Registration successful. Please check your email for the verification code.',
+    };
   }
 
   // 2. Set the return type to Promise<AuthResponseDto>
