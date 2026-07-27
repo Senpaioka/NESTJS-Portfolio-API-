@@ -17,6 +17,7 @@ import { ForgotPasswordDto } from './dto/forget-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationOtpDto } from './dto/resend-verification-otp.dto';
+import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Role } from '../common/enums/role.enum';
 import { AuthResponse } from './interfaces/auth-response.interface';
@@ -241,19 +242,69 @@ export class AuthService {
 
     const passwordHash = await argon2.hash(dto.password);
 
+    const deactivateToken = crypto.randomBytes(32).toString('hex');
+    const hashedDeactivateToken = crypto
+      .createHash('sha256')
+      .update(deactivateToken)
+      .digest('hex');
+    const deactivateExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
         password_hash: passwordHash,
         password_reset_token: null,
         password_reset_expires: null,
+        deactivate_token: hashedDeactivateToken,
+        deactivate_expires: deactivateExpires,
       },
     });
 
-    await this.mailService.sendPasswordChangedEmail(user.email, user.username);
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const deactivateUrl = `${clientUrl}/deactivate-account?token=${deactivateToken}`;
+
+    await this.mailService.sendPasswordChangedEmail(
+      user.email,
+      user.username,
+      deactivateUrl,
+    );
 
     return { message: 'Password has been reset successfully.' };
   }
+
+  // deactivate account
+  async deactivateAccount(
+    dto: DeactivateAccountDto,
+  ): Promise<{ message: string }> {
+    const hashedDeactivateToken = crypto
+      .createHash('sha256')
+      .update(dto.token)
+      .digest('hex');
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        deactivate_token: hashedDeactivateToken,
+        deactivate_expires: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired deactivation token.');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        is_active: false,
+        refresh_token_hash: null,
+        deactivate_token: null,
+        deactivate_expires: null,
+      },
+    });
+
+    return { message: 'Account has been deactivated successfully.' };
+  }
+
 
   // verify email
   async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string }> {

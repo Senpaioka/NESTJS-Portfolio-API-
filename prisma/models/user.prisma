@@ -21,6 +21,9 @@ model User {
 
     is_active           Boolean  @default(true)
     
+    deactivate_token    String?   @unique
+    deactivate_expires  DateTime?
+    
     created_at          DateTime @default(now())
     updated_at          DateTime @updatedAt 
 }

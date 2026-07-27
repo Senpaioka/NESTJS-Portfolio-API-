@@ -15,6 +15,7 @@ import { ForgotPasswordDto } from './dto/forget-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationOtpDto } from './dto/resend-verification-otp.dto';
+import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { Public } from './decorators/public.decorator';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -129,5 +130,13 @@ export class AuthController {
   @Post('resend-verification-otp')
   async resendVerificationOtp(@Body() dto: ResendVerificationOtpDto) {
     return this.authService.resendVerificationOtp(dto);
+  }
+
+  // deactivate account
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 600000 } }) // 5 requests / 10 minutes
+  @Post('deactivate-account')
+  async deactivateAccount(@Body() dto: DeactivateAccountDto) {
+    return this.authService.deactivateAccount(dto);
   }
 }
