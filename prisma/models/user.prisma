@@ -18,6 +18,8 @@ model User {
     email_verification_hash String?
     email_verification_expires_at DateTime?
     is_verified         Boolean  @default(false)
+
+    is_active           Boolean  @default(true)
     
     created_at          DateTime @default(now())
     updated_at          DateTime @updatedAt 

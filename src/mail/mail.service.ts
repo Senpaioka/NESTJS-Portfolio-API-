@@ -29,7 +29,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Password Reset Code',
-      template: 'forgot-password',
+      template: 'auth/forgot-password',
       context: {
         username,
         otp,
@@ -40,18 +40,22 @@ export class MailService {
   async sendPasswordChangedEmail(
     email: string,
     username: string,
+    deactivateUrl?: string,
   ): Promise<void> {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Your Password Has Been Changed',
-      template: 'password-changed',
+      template: 'auth/password-changed',
       context: {
         username,
+        deactivateUrl:
+          deactivateUrl ||
+          `${process.env.CLIENT_URL || 'http://localhost:3000'}/deactivate-account`,
+        year: new Date().getFullYear(),
       },
     });
   }
 
-  // eslint-disable-next-line prettier/prettier
   async sendWelcomeEmail(
     email: string,
     username: string,
@@ -59,9 +63,11 @@ export class MailService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Welcome!',
-      template: 'welcome',
+      template: 'auth/welcome',
       context: {
         username,
+        loginUrl: process.env.CLIENT_LOGIN_URL || 'http://localhost:3000/login',
+        year: new Date().getFullYear(),
       },
     });
   }

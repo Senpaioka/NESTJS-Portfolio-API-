@@ -135,7 +135,7 @@ export class AuthService {
       where: { id: userId },
     });
 
-    if (!user || !user.refresh_token_hash) {
+    if (!user || !user.is_active || !user.refresh_token_hash) {
       throw new UnauthorizedException('Access Denied');
     }
 
@@ -157,7 +157,7 @@ export class AuthService {
       where: { email: dto.email },
     });
 
-    if (!user) {
+    if (!user || !user.is_active) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -250,6 +250,8 @@ export class AuthService {
       },
     });
 
+    await this.mailService.sendPasswordChangedEmail(user.email, user.username);
+
     return { message: 'Password has been reset successfully.' };
   }
 
@@ -297,6 +299,8 @@ export class AuthService {
         email_verification_expires_at: null,
       },
     });
+
+    await this.mailService.sendWelcomeEmail(user.email, user.username);
 
     return {
       message: 'Email verified successfully.',
