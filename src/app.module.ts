@@ -21,6 +21,7 @@ import { ResumesModule } from './resumes/resumes.module';
 import { ProjectsModule } from './projects/projects.module';
 import { PageViewsModule } from './page-views/pageviews.module';
 import { ExperiencesModule } from './experiences/experiences.module';
+import { EducationsModule } from './educations/educations.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ExperiencesModule } from './experiences/experiences.module';
     ProjectsModule,
     PageViewsModule,
     ExperiencesModule,
+    EducationsModule,
   ],
 
   controllers: [AppController],
