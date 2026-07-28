@@ -20,6 +20,7 @@ import { SkillsModule } from './skills/skills.module';
 import { ResumesModule } from './resumes/resumes.module';
 import { ProjectsModule } from './projects/projects.module';
 import { PageViewsModule } from './page-views/pageviews.module';
+import { ExperiencesModule } from './experiences/experiences.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { PageViewsModule } from './page-views/pageviews.module';
     ResumesModule,
     ProjectsModule,
     PageViewsModule,
+    ExperiencesModule,
   ],
 
   controllers: [AppController],
