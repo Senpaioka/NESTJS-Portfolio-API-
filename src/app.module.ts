@@ -24,6 +24,7 @@ import { ExperiencesModule } from './experiences/experiences.module';
 import { EducationsModule } from './educations/educations.module';
 import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { PostsModule } from './posts/posts.module';
+import { AdditionalInfoModule } from './additional-info/additional-info.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { PostsModule } from './posts/posts.module';
     EducationsModule,
     ContactMessagesModule,
     PostsModule,
+    AdditionalInfoModule,
   ],
 
   controllers: [AppController],
