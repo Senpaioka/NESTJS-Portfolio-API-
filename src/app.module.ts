@@ -18,6 +18,7 @@ import { ProfilesModule } from './profiles/profiles.module';
 import { SocialsModule } from './socials/socials.module';
 import { SkillsModule } from './skills/skills.module';
 import { ResumesModule } from './resumes/resumes.module';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ResumesModule } from './resumes/resumes.module';
     SocialsModule,
     SkillsModule,
     ResumesModule,
+    ProjectsModule,
   ],
 
   controllers: [AppController],
