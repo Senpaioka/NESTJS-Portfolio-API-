@@ -16,6 +16,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { MailModule } from './mail/mail.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { SocialsModule } from './socials/socials.module';
+import { SkillsModule } from './skills/skills.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SocialsModule } from './socials/socials.module';
     MailModule,
     ProfilesModule,
     SocialsModule,
+    SkillsModule,
   ],
 
   controllers: [AppController],
