@@ -1,0 +1,17 @@
+model Resume {
+    id      String @id @default(uuid())
+    user_id String @unique
+
+    public_url   String
+    storage_path String
+    file_name    String?
+    file_size    Int?
+
+    mime_type  String?  @default("application/pdf")
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@map("resumes")
+}

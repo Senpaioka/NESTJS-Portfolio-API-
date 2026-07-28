@@ -1,0 +1,16 @@
+model SocialLink {
+  id            String   @id @default(uuid())
+  user_id       String
+  platform_name String
+  url           String
+  icon_slug     String?
+  display_order Int      @default(0)
+  is_visible    Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, platform_name])
+  @@map("social_links")
+}

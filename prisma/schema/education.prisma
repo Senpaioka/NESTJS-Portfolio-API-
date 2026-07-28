@@ -1,0 +1,18 @@
+model Education {
+    id             String    @id @default(uuid())
+    user_id        String
+    institution    String
+    degree         String
+    field_of_study String?
+    start_date     DateTime
+    end_date       DateTime?
+    grade          String?
+    description    String?
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@map("educations")
+}

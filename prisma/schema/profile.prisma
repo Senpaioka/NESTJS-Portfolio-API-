@@ -1,0 +1,35 @@
+model Profile {
+  id      String @id @default(uuid())
+  user_id String @unique
+
+  full_name String?
+
+  // Display Picture (Avatar) Storage fields
+  dp_public_url   String?
+  dp_storage_path String?
+
+  // Cover Image Storage fields
+  cover_image_public_url   String?
+  cover_image_storage_path String?
+
+  title                 String?
+  tagline               String?
+  public_email          String?
+  public_phone          String?
+  bio_text              String?
+  professional_summary  String?
+  location              String?
+  is_available_for_hire Boolean  @default(true)
+  languages             String[]
+  year_of_experience    Int      @default(0)
+
+  // theme for portfolio
+  theme String @default("dark")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}

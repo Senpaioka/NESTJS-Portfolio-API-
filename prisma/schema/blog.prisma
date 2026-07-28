@@ -1,0 +1,17 @@
+model Post {
+    id             String    @id @default(uuid())
+    user_id        String
+    title          String
+    slug           String
+    content        String
+    featured_image String?
+    is_published   Boolean   @default(false)
+    published_at   DateTime?
+    created_at     DateTime  @default(now())
+    updated_at     DateTime  @updatedAt
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@unique([user_id, slug])
+    @@map("posts")
+}

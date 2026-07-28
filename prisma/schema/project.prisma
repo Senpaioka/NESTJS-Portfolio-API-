@@ -1,0 +1,30 @@
+model Project {
+    id      String @id @default(uuid())
+    user_id String
+
+    project_name      String
+    short_description String?
+    description       String?
+
+    // Links
+    project_url String?
+    live_url    String?
+
+    // File Storage
+    public_url   String?
+    storage_path String?
+
+    // Metadata
+    skills      Skill[]
+    is_featured Boolean @default(false)
+
+    start_date DateTime?
+    end_date   DateTime?
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@map("projects")
+}

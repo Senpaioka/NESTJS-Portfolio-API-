@@ -1,0 +1,16 @@
+model AdditionalInfo {
+    id         String   @id @default(uuid())
+    user_id    String
+    title      String
+    sub_title  String?
+    options    String[]
+    info_body  String?
+    is_visible Boolean  @default(true)
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@map("additional_infos")
+}

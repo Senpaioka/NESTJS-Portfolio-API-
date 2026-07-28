@@ -1,0 +1,13 @@
+model PageView {
+    id         String   @id @default(uuid())
+    user_id    String
+    ip_address String?
+    referrer   String?
+    device     String?
+    country    String?
+    created_at DateTime @default(now())
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@map("page_views")
+}

@@ -1,0 +1,31 @@
+enum LocationType {
+    REMOTE
+    HYBRID
+    ON_SITE
+}
+
+model Experience {
+    id      String @id @default(uuid())
+    user_id String
+
+    company_name    String
+    company_url     String?
+    position        String
+    employment_type String?
+    location        String?
+    location_type   LocationType?
+
+    start_date DateTime
+    end_date   DateTime?
+
+    description    String?
+    assigned_tasks String[]
+    skills         String[]
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt()
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@map("experiences")
+}
