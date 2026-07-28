@@ -15,6 +15,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { MailModule } from './mail/mail.module';
 import { ProfilesModule } from './profiles/profiles.module';
+import { SocialsModule } from './socials/socials.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ProfilesModule } from './profiles/profiles.module';
     AuthModule,
     MailModule,
     ProfilesModule,
+    SocialsModule,
   ],
 
   controllers: [AppController],
