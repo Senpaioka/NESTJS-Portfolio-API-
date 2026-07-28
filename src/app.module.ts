@@ -17,6 +17,7 @@ import { MailModule } from './mail/mail.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { SocialsModule } from './socials/socials.module';
 import { SkillsModule } from './skills/skills.module';
+import { ResumesModule } from './resumes/resumes.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { SkillsModule } from './skills/skills.module';
     ProfilesModule,
     SocialsModule,
     SkillsModule,
+    ResumesModule,
   ],
 
   controllers: [AppController],
